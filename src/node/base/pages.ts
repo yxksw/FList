@@ -28,7 +28,7 @@ export function createFilePage(app: App, path: string, file: File): Promise<Page
             content: file.content,
         },
     }
-    console.log(path, 123456)
+    // console.log(path, 123456)
     return createPage(app, {
         path: path,
         frontmatter: frontmatter
@@ -70,7 +70,7 @@ export function createFolderPage(app: App, path: string, folder: Folder): Promis
             content: folder.content,
         },
     }
-    console.log(path, 123456)
+    // console.log(path, 123456)
     return createPage(app, {
         path: path,
         frontmatter: frontmatter,
