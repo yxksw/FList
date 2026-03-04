@@ -1,9 +1,6 @@
 import { viteBundler } from '@vuepress/bundler-vite'
 import { defineUserConfig } from 'vuepress'
 import { FileList } from './src/node/index.js'
-import { sitemapPlugin } from '@vuepress/plugin-sitemap'
-import { seoPlugin } from '@vuepress/plugin-seo'
-import {FilePageFrontmatter, FolderPageFrontmatter} from "./src/type/index.js";
 
 export default defineUserConfig({
   bundler: viteBundler(),
@@ -19,23 +16,5 @@ export default defineUserConfig({
   // 页面预加载，所有其它页面所需的文件都会被预拉取。这对于小型站点来说是十分有帮助的，因为它会大大提升页面切换的速度。但是在你的网站有很多页面时不建议你这么做。
   // 简单来说就是，如果你的文件不多就可以打开这个选项，可以大大提高页面切换的速度，如果文件非常多就不建议打开。建议超过100个文件就不要打开这个选项。
   shouldPrefetch: true,
-  plugins:[
-    sitemapPlugin({
-      hostname: 'flist.jjaw.cn',
-      modifyTimeGetter: (page) => {
-        let f = page.frontmatter;
-        let item = 0;
-        if(f.layout=="Folder"){
-          item = ((f as any) as FolderPageFrontmatter).folder?.updateTime || 0;
-        }else if(f.layout=="File"){
-          item = ((f as any) as FilePageFrontmatter).file?.updateTime || 0;
-        }
-        return new Date(item).toISOString()
-      }
-    }),
-    seoPlugin({
-      hostname: 'flist.jjaw.cn'
-    })
-  ],
   theme: FileList()
 })
