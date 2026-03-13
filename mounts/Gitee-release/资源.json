@@ -1,0 +1,13 @@
+{
+    "analysis": {
+        "type": "giteeReleasesFilesAnalysis",
+        "options": {
+            "user": "kemiaoshiwo",
+            "repository": "flist",
+            "direction": "desc",
+            "authorizationToken": {
+                "$env": "GITEE_TOKEN"
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "analysis": {
+    "type": "githubReleasesFilesAnalysis",
+    "options": {
+      "user": "yxksw",
+      "repository": "Flist-resources",
+      "authorizationToken": {
+        "$env": "GITHUB_TOKEN"
+      }
+    }
+  },
+  "downProxy": {
+    "type": "cloudflarePagesDownProxy"
+  }
+}

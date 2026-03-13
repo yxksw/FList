@@ -1,0 +1,8 @@
+{
+  "analysis": {
+    "type": "fileUrlTreeAnalysis",
+    "options": {
+      "Github/yxk-avatar.avif": "https://cdn.jsdmirror.com/gh/zsxcoder/github-img@main/img/yxk-avatar.avif"
+    }
+  }
+}

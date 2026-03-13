@@ -1,0 +1,17 @@
+{
+  "analysis": {
+    "type": "githubReposAnalysis",
+    "options": {
+      "user": "yxksw",
+      "repository": "Flist-resources",
+      "ref": "main",
+      "maxDeep": 5,
+      "authorizationToken": {
+        "$env": "GITHUB_TOKEN"
+        }      
+    }
+  },
+  "downProxy": {
+    "type": "cloudflarePagesDownProxy"
+  }
+}
