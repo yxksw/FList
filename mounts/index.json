@@ -2,7 +2,7 @@
   "analysis": {
     "type": "githubReleasesFilesAnalysis",
     "options": {
-      "user": "jianjianai",
+      "user": "yxksw",
       "repository": "FList-resources",
       "authorizationToken": {"$env": "GITHUB_TOKEN"}
     }
