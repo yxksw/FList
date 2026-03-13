@@ -1,0 +1,131 @@
+name: Build and Deploy to Cloudflare Pages
+
+on:
+  # 定时检查仓库更新（每5分钟）
+  schedule:
+    - cron: '*/5 * * * *'
+  
+  # 手动触发
+  workflow_dispatch:
+  
+  # 本仓库代码推送时触发
+  push:
+    branches:
+      - main
+      - master
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  check-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Check for updates
+        id: check_updates
+        run: |
+          # 创建状态目录
+          mkdir -p .github/status
+          
+          # 获取 GitHub 仓库的最新提交
+          GITHUB_REPO_COMMIT=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/yxksw/Flist-resources/commits/master" | jq -r '.sha')
+          echo "github_repo_commit=$GITHUB_REPO_COMMIT" >> $GITHUB_ENV
+          
+          # 获取 GitHub Release 的最新发布
+          GITHUB_RELEASE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/yxksw/Flist-resources/releases/latest" | jq -r '.published_at')
+          echo "github_release=$GITHUB_RELEASE" >> $GITHUB_ENV
+          
+          # 获取 Gitee Release 的最新发布
+          GITEE_RELEASE=$(curl -s \
+            "https://gitee.com/api/v5/repos/kemiaoshiwo/flist/releases" | jq -r '.[0].created_at')
+          echo "gitee_release=$GITEE_RELEASE" >> $GITHUB_ENV
+          
+          # 读取上次记录的状态
+          if [ -f .github/status/last_check ]; then
+            source .github/status/last_check
+          fi
+          
+          # 检查是否有更新
+          NEED_BUILD=false
+          
+          if [ "$LAST_GITHUB_REPO_COMMIT" != "$GITHUB_REPO_COMMIT" ]; then
+            echo "GitHub 仓库有新的提交"
+            NEED_BUILD=true
+          fi
+          
+          if [ "$LAST_GITHUB_RELEASE" != "$GITHUB_RELEASE" ]; then
+            echo "GitHub Release 有更新"
+            NEED_BUILD=true
+          fi
+          
+          if [ "$LAST_GITEE_RELEASE" != "$GITEE_RELEASE" ]; then
+            echo "Gitee Release 有更新"
+            NEED_BUILD=true
+          fi
+          
+          echo "need_build=$NEED_BUILD" >> $GITHUB_OUTPUT
+          
+          # 保存当前状态
+          cat > .github/status/last_check << EOF
+          LAST_GITHUB_REPO_COMMIT=$GITHUB_REPO_COMMIT
+          LAST_GITHUB_RELEASE=$GITHUB_RELEASE
+          LAST_GITEE_RELEASE=$GITEE_RELEASE
+          EOF
+        shell: bash
+
+      - name: Install dependencies
+        if: steps.check_updates.outputs.need_build == 'true' || github.event_name != 'schedule'
+        run: pnpm install
+
+      - name: Build project
+        if: steps.check_updates.outputs.need_build == 'true' || github.event_name != 'schedule'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: pnpm build
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.check_updates.outputs.need_build == 'true' || github.event_name != 'schedule'
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

@@ -7,6 +7,7 @@ export default defineUserConfig({
   pagePatterns: [],
   lang: 'zh-CN',
   public: `./public`,
+  dest: 'dist',
   // 网站标题，标题颜色可在 src/client/css/main.css 中修改
   title: 'FList',
   // 网站的简介，有助于搜索引擎收录
