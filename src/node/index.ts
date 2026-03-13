@@ -11,6 +11,10 @@ import {
 } from "./base/eventManager.js";
 import {nprogressPlugin} from "@vuepress/plugin-nprogress";
 import { loadAnalysisConfigFromDir } from "./config/loadAnalysisConfigFromDir.js";
+import { config } from "dotenv";
+
+// 加载 .env 文件中的环境变量
+config();
 
 const __dirname = getDirname(import.meta.url)
 
