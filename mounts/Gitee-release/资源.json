@@ -5,7 +5,7 @@
             "user": "kemiaoshiwo",
             "repository": "flist",
             "direction": "desc",
-            "authorizationToken": {
+            "access_token": {
                 "$env": "GITEE_TOKEN"
             }
         }
